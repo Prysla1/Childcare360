@@ -21,3 +21,1320 @@ if(!session) redirect('/')
    </>
   );
 }
+import { fetcCategories, fetcChilds, fetcNurseries, fetcParents, fetcStaffs } from "@/backend/controller";
+
+export const dynamic = 'force-dynamic' // defaults to auto
+export async function GET(request: Request, { params }: { params: { action: string } }) {
+    const { searchParams } = new URL(request.url);
+    const action = searchParams.get("action");
+    if(action == 'nursery'){
+      const data = await fetcNurseries();
+      return Response.json(data);
+    
+    } else if(action == 'staff'){
+      const data = await fetcStaffs();
+      return Response.json(data)
+    
+    } else if(action == 'child'){
+      const data = await fetcChilds();
+      return Response.json(data)
+    
+    } else if(action == 'parent'){
+      const data = await fetcParents();
+      return Response.json(data)
+    
+    } else if(action == 'category'){
+      const data = await fetcCategories();
+      return Response.json(data)
+    }
+    
+    
+    return Response.json(null);
+}@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}import Provider from "@/components/Provider";
+import { Toaster } from "@/components/ui/toaster";
+import type { Metadata } from "next";
+import { Great_Vibes, Inter, Kalam, Open_Sans, Roboto_Mono, Shadows_Into_Light } from "next/font/google";
+import "./globals.css";
+
+const inter = Inter({
+   subsets: ["latin"],
+   display: 'swap',
+   variable: '--font-inter' 
+});
+
+const shadowsIntoLight = Shadows_Into_Light({ 
+    weight:"400",
+    subsets: ["latin"],
+    variable: '--font-shadows' 
+});
+
+const openSans = Open_Sans({
+    subsets: ['latin'],
+    display: 'swap',
+    variable: '--font-opensans',
+})
+
+const robotoMono = Roboto_Mono({
+    subsets: ['latin'],
+    display: 'swap',
+    variable: '--font-roboto',
+})
+
+const greatVibes = Great_Vibes({
+    subsets: ['latin'],
+    weight:"400",
+    variable: '--font-vibes',
+})
+
+const kalam = Kalam({
+    subsets: ['latin'],
+    weight:"400",
+    variable: '--font-kalam',
+})
+
+export const metadata: Metadata = {
+  title: "ChildCare360",
+  description: "Childcare Management System",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`${kalam.variable} ${greatVibes.variable} ${openSans.variable} ${robotoMono.variable} ${inter.variable} ${shadowsIntoLight.variable}`}>
+        <Provider> 
+          {children}
+        </Provider> 
+        <Toaster />  
+      </body>
+    </html>
+  );
+}"use client"
+import Header from "@/components/Header";
+import { toast } from "@/components/ui/use-toast";
+import { signIn } from "next-auth/react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { BiLoaderCircle } from "react-icons/bi";
+import Bg from '../public/loginbg.svg';
+
+export default function Home() {
+  const router = useRouter();
+  const [form,setForm ]:any = useState();
+  const [ loading, setLoading ] = useState(false);
+  const [ msg, setMsg ] = useState(null);
+
+
+  const onChange = (e:any) => setForm({ ...form, [e.target.name]: e.target.value })
+  
+  const submitLogin:any = async (e:any) => {
+    e.preventDefault();
+    try {
+      setLoading(true)
+      const resp:any = await signIn('credentials', { redirect: false, callbackUrl: `/dash`, username: form?.username?.trim(), password: form?.password?.trim() })
+      if(resp?.ok){
+        router.push(resp?.url); 
+        //window.location.href=resp?.url
+        setLoading(false);
+      } else {
+        toast({
+          position:"top",
+          title: "INVALID CREDENTIALS!",
+          className: "py-3 bg-red-500 text-white text-3xl font-black tracking-wide"
+        })
+        setLoading(false);
+        
+      }
+    } catch (error) {
+      setLoading(false);
+      console.log(error)
+    }
+  }
+  
+  return (
+    <main className="flex min-h-screen flex-col">
+        <Header />
+        <div className={`relative w-full md:h-[50rem] bg-primarybg  rounded-bl-[95%]`}>
+            <Image src={Bg} alt="Login" priority className="z-1 absolute right-0 top-64 md:-top-10" width={1000} height={1000} /> 
+            <div className="mt-20  md:py-20 md:mx-auto md:max-w-7xl rounded-xl grid md:grid-cols-3">
+                <div></div>
+                <div></div>
+                <div className="z-10 h-64 bg-secondary/20 border-8 border-secondary rounded-tr-3xl rounded-bl-3xl shadow-xl flex items-center justify-center">
+                    <form method="post" onSubmit={submitLogin} className="p-6 w-full bg-[#BCE3BA] font-roboto rounded-xl flex flex-col space-y-3">
+                      <label htmlFor="" className="flex flex-col -space-y-1">
+                         <span className="py-2 font-black font-kalam text-lg text-primary tracking-widest">USERNAME</span>
+                         <input name="username" onChange={onChange} className="px-4 py-3 ring-4 ring-secondary placeholder:text-[#F69320] placeholder:text-sm placeholder:font-semibold placeholder:tracking-widest rounded-full" type="text" placeholder="USERNAME" />
+                      </label>
+                      <label htmlFor="" className="flex flex-col -space-y-1">
+                         <span className="py-2 font-black font-kalam text-lg text-primary tracking-widest">PASSWORD</span>
+                         <input name="password" onChange={onChange} className="px-4 py-3 ring-4 ring-secondary placeholder:text-[#F69320] placeholder:text-sm placeholder:font-semibold placeholder:tracking-widest rounded-full" type="text" placeholder="PASSWORD" />
+                      </label>
+                      <button type="submit" className="px-6 py-3 bg-primary border-4 border-secondary rounded-full text-secondary text-xl font-inter font-bold tracking-widest">
+                        { !loading 
+                          ? <span>SIGN IN</span>
+                          : <div className="flex item-center justify-center space-x-3">
+                              <BiLoaderCircle className="h-6 w-6 animate-spin" />
+                              <span className="tracking-wide text-lg animate-pulse">Authenticating ...</span>
+                            </div>
+                        }
+                      </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <footer></footer>
+    </main>
+  );"use server"
+
+import { PrismaClient } from "@prisma/client";
+import moment from "moment";
+import { revalidatePath } from "next/cache";
+const db = new PrismaClient();
+
+      export async function authenticate(username:string,password:string) {
+        try {
+            let user;
+            const staff = await db.staff.findFirst({ where: { reference: username, password } });
+            const parent = await db.parent.findFirst({ where: { reference: username, password } });
+            
+            if(staff) user = { 
+               ...staff, 
+               ...( staff?.position?.toLowerCase() == 'admin'? { image: 'admin', name: `${staff?.firstName} ${staff?.lastName}` }: { image: 'tutor', name: `${staff?.firstName} ${staff?.lastName}` }) 
+            }
+            if(parent) user = { ...parent, image: 'parent', name: `${parent?.firstName} ${parent?.lastName}` }
+            return user;
+
+        } catch (error: any) {
+            console.log(error);
+            return null;
+        }
+    }
+
+    /* AUTHENTICATION MODELS */
+
+    /* NURSERY MODELS */
+    export async function fetcNurseries() {
+        const resp = await db.nursery.findMany({ include: { staff: true } , orderBy: { createdAt: 'desc' }});
+        if(resp.length) return resp;
+        return null;
+    }
+
+    export async function fetcNursery(id: string) {
+        const resp = await db.nursery.findUnique({ where: { id } });
+        if(resp ) return resp;
+        return null;
+    }
+
+    export async function postNursery(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        let resp;
+        const { id } = data ?? null;
+        delete data.id
+
+        if(id){   // Update
+            resp = await db.nursery.update({
+                where: { id },
+                data
+             });
+        } else {  // Create
+           resp = await db.nursery.create({
+              data
+           });
+        }
+        
+        revalidatePath('/nurseries')
+        if(resp) return resp;
+        return null;
+    }
+
+    export async function deleteNursery(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        const { id } = data ?? null;
+        const resp = await db.nursery.delete({ where: { id } });
+        
+        revalidatePath('/nurseries')
+        if(resp ) return resp;
+        return null;
+    }
+
+
+    /* STAFF MODELS */
+    export async function fetcStaffs() {
+        const resp = await db.staff.findMany({ include: { nursery: true } , orderBy: { createdAt: 'desc' }});
+        if(resp.length) return resp;
+        return null;
+    }
+
+    export async function fetcStaff(id: string) {
+        const resp = await db.staff.findUnique({ where: { id } });
+        if(resp ) return resp;
+        return null;
+    }
+
+    export async function postStaff(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        let resp;
+        //data.nurseryId = "3404f444-f25d-4ec1-ae57-b7908d2093d3";
+        const { id } = data ?? null;
+        delete data.id
+
+        if(id){   // Update
+            resp = await db.staff.update({
+                where: { id },
+                data
+             });
+        } else {  // Create
+           resp = await db.staff.create({
+              data
+           });
+        }
+        
+        revalidatePath('/staff')
+        if(resp) return resp;
+        return null;
+    }
+
+    export async function deleteStaff(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        const { id } = data ?? null;
+        const resp = await db.staff.delete({ where: { id } });
+        
+        revalidatePath('/staff')
+        if(resp ) return resp;
+        return null;
+    }
+
+    /* CHILD MODELS */
+    export async function fetcChilds() {
+        const resp = await db.child.findMany({ include: { nursery: true, parentChild: { select: { parent:true }}} , orderBy: { createdAt: 'desc' }});
+        if(resp.length) return resp;
+        return null;
+    }
+
+    export async function fetcChildByParent(id:string) {
+        // @ts-ignore
+        const resp = await db.child.findMany({ where:{ parentChild: { childId: id }}, include: { parentChild: { select: { parent:true }}} , orderBy: { createdAt: 'desc' }});
+        if(resp.length) return resp;
+        return null;
+    }
+
+    export async function fetcChildByClass(id: string) {
+        const resp = await db.child.findMany({ where:{ nurseryId: id }, include: { parentChild: { select: { parent:true }}} , orderBy: { createdAt: 'desc' }});
+        if(resp.length) return resp;
+        return null;
+    }
+
+    export async function fetcChild(id: string) {
+        const resp = await db.child.findUnique({ where: { id } });
+        if(resp ) return resp;
+        return null;
+    }
+
+    export async function postChild(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        let resp;
+        const { id } = data ?? null;
+        data.birthDate = moment(data.birthDate);
+        delete data.id
+        
+
+        if(id){   // Update
+            resp = await db.child.update({
+                where: { id },
+                data
+             });
+        } else {  // Create
+           resp = await db.child.create({
+              data
+           });
+        }
+        
+        revalidatePath('/child')
+        if(resp) return resp;
+        return null;
+    }
+
+    export async function deleteChild(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        const { id } = data ?? null;
+        const resp = await db.child.delete({ where: { id } });
+        
+        revalidatePath('/child')
+        if(resp ) return resp;
+        return null;
+    }
+
+    /* PARENT MODELS */
+    export async function fetcParents() {
+        const resp = await db.parent.findMany({ include: { parentChild: true } , orderBy: { createdAt: 'desc' }});
+        if(resp.length) return resp;
+        return null;
+    }
+
+    export async function fetcParent(id: string) {
+        const resp = await db.parent.findUnique({ where: { id } });
+        if(resp ) return resp;
+        return null;
+    }
+
+    export async function postParent(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        let resp;
+        const { id } = data ?? null;
+        delete data.id
+
+        if(id){   // Update
+            resp = await db.parent.update({
+                where: { id },
+                data
+             });
+        } else {  // Create
+           resp = await db.parent.create({
+              data
+           });
+        }
+        
+        revalidatePath('/parents')
+        if(resp) return resp;
+        return null;
+    }
+
+    export async function deleteParent(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        const { id } = data ?? null;
+        const resp = await db.parent.delete({ where: { id } });
+        
+        revalidatePath('/parents')
+        if(resp ) return resp;
+        return null;
+    }
+
+    /* PARENT- CHILD MODELS */
+    export async function postParentChild(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        let resp;
+        const { id } = data ?? null;
+        delete data.id
+
+        if(id){   // Update
+            resp = await db.parentChild.update({
+                where: { id },
+                data
+             });
+        } else {  // Create
+           resp = await db.parentChild.create({
+              data
+           });
+        }
+        revalidatePath('/child')
+        if(resp) return resp;
+        return null;
+    }
+
+    export async function deleteParentChild(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        const { id } = data ?? null;
+        const resp = await db.parentChild.delete({ where: { id } });
+        
+        revalidatePath('/child')
+        if(resp ) return resp;
+        return null;
+    }
+
+    /* PAYMENT MODELS */
+    export async function fetcPayments() {
+        const resp = await db.payment.findMany({ include: { child: true }, orderBy: { createdAt: 'desc' }});
+        if(resp.length) return resp;
+        return null;
+    }
+
+    export async function fetcPaymentsByChild(id: string) {
+        const resp = await db.payment.findMany({ where:{ childId: id }, include: { child: true }, orderBy: { createdAt: 'desc' }});
+        if(resp ) return resp;
+        return null;
+    }
+
+    export async function fetcPayment(id: string) {
+        const resp = await db.payment.findUnique({ where: { id } });
+        if(resp ) return resp;
+        return null;
+    }
+
+    export async function postPayment(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        let resp;
+        const { id } = data ?? null;
+        data.amount = parseFloat(data.amount);
+        data.paidOn = moment(data.paidOn);
+        delete data.id
+
+        if(id){   // Update
+            resp = await db.payment.update({
+                where: { id },
+                data
+             });
+        } else {  // Create
+           resp = await db.payment.create({
+              data
+           });
+        }
+        
+        revalidatePath('/payments')
+        if(resp) return resp;
+        return null;
+    }
+
+    export async function deletePayment(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        const { id } = data ?? null;
+        const resp = await db.payment.delete({ where: { id } });
+        
+        revalidatePath('/payments')
+        if(resp ) return resp;
+        return null;
+    }
+
+    /* MEDICAL RECORDS MODELS */
+    export async function fetcMedicals() {
+        const resp = await db.medicalRecord.findMany({ include:{ child: true }, orderBy: { createdAt: 'desc' }});
+        if(resp.length) return resp;
+        return null;
+    }
+
+    export async function fetcMedicalByChild(id: string) {
+        const resp = await db.medicalRecord.findMany({ where: { childId: id }, include:{ child: true }, orderBy: { createdAt: 'desc' }});
+        if(resp ) return resp;
+        return null;
+    }
+
+    export async function fetcMedical(id: string) {
+        const resp = await db.medicalRecord.findUnique({ where: { id } });
+        if(resp ) return resp;
+        return null;
+    }
+
+    export async function postMedical(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        let resp;
+        const { id } = data ?? null;
+        delete data.id
+
+        if(id){   // Update
+            resp = await db.medicalRecord.update({
+                where: { id },
+                data
+             });
+        } else {  // Create
+           resp = await db.medicalRecord.create({
+              data
+           });
+        }
+        
+        revalidatePath('/medicals')
+        if(resp) return resp;
+        return null;
+    }
+
+    export async function deleteMedical(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        const { id } = data ?? null;
+        const resp = await db.medicalRecord.delete({ where: { id } });
+        
+        revalidatePath('/medicals')
+        if(resp ) return resp;
+        return null;
+    }
+
+    /* ACTIVITY CATEGORY MODELS */
+    export async function fetcCategories() {
+        const resp = await db.activityType.findMany({ include:{ nursery: true }, orderBy: { createdAt: 'desc' }});
+        if(resp.length) return resp;
+        return null;
+    }
+
+    export async function fetcCategory(id: string) {
+        const resp = await db.activityType.findUnique({ where: { id } });
+        if(resp ) return resp;
+        return null;
+    }
+
+    export async function postCategory(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        let resp;
+        const { id } = data ?? null;
+        delete data.id
+        if(id){   // Update
+            resp = await db.activityType.update({
+                where: { id },
+                data
+             });
+        } else {  // Create
+           resp = await db.activityType.create({
+              data
+           });
+        }
+        revalidatePath('/categories')
+        if(resp) return resp;
+        return null;
+    }
+
+    export async function deleteCategory(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        const { id } = data ?? null;
+        const resp = await db.activityType.delete({ where: { id } });
+        
+        revalidatePath('/categories')
+        if(resp ) return resp;
+        return null;
+    }
+
+    /* ACTIVITY MODELS */
+    export async function fetcActivities() {
+        const resp = await db.activity.findMany({ include:{ child: true, activityType: true }, orderBy: { createdAt: 'desc' }});
+        if(resp.length) return resp;
+        return null;
+    }
+
+    export async function fetcActivityByChild(id: string) {
+        const resp = await db.activity.findMany({ where: { childId: id }, include:{ child: true, activityType: true }, orderBy: { createdAt: 'desc' }});
+        if(resp ) return resp;
+        return null;
+    }
+    
+    export async function fetcActivityByNursery(id: string) {
+        const resp = await db.activity.findMany({ where: { child: { nurseryId: id }}, include:{ child: true, activityType: true }, orderBy: { createdAt: 'desc' }});
+        if(resp ) return resp;
+        return null;
+    }
+
+    export async function fetcActivity(id: string) {
+        const resp = await db.activity.findUnique({ where: { id } });
+        if(resp ) return resp;
+        return null;
+    }
+
+
+    export async function postActivity(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        let resp;
+        const { id } = data ?? null;
+        delete data.id
+
+        if(id){   // Update
+            resp = await db.activity.update({
+                where: { id },
+                data
+             });
+        } else {  // Create
+           resp = await db.activity.create({
+              data
+           });
+        }
+        
+        revalidatePath('/activities')
+        if(resp) return resp;
+        return null;
+    }
+
+    export async function deleteActivity(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        const { id } = data ?? null;
+        const resp = await db.activity.delete({ where: { id } });
+        
+        revalidatePath('/activities')
+        if(resp ) return resp;
+        return null;
+    }
+
+    /* ATTENDANCE MODELS */
+    export async function fetcAttendances() {
+        const resp = await db.attendance.findMany({ include:{ child: true }, orderBy: { createdAt: 'desc' }});
+        if(resp.length) return resp;
+        return null;
+    }
+
+    export async function fetcAttendanceByChild(id: string) {
+        const resp = db.attendance.findMany({ where: { childId:id }, include:{ child: true }, orderBy: { createdAt: 'desc' }});
+        if(resp ) return resp;
+        return null;
+    }
+
+    export async function fetcAttendanceByNursery(id: string) {
+        const resp = db.attendance.findMany({ where: { child: { nurseryId:id }}, include:{ child: true }, orderBy: { createdAt: 'desc' }});
+        if(resp ) return resp;
+        return null;
+    }
+
+    export async function fetcAttendance(id: string) {
+        const resp = await db.attendance.findUnique({ where: { id } });
+        if(resp ) return resp;
+        return null;
+    }
+
+    export async function postAttendance(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        let resp;
+        const { id } = data ?? null;
+        data.checkIn = moment(data.checkIn);
+        data.checkOut = moment(data.checkOut);
+        delete data.id
+
+        if(id){   // Update
+            resp = await db.attendance.update({
+                where: { id },
+                data
+             });
+        } else {  // Create
+           resp = await db.attendance.create({
+              data
+           });
+        }
+        
+        revalidatePath('/attendance')
+        if(resp) return resp;
+        return null;
+    }
+
+    export async function deleteAttendance(formData: FormData) {
+        let data:any = Object.fromEntries(formData);
+        const { id } = data ?? null;
+        const resp = await db.attendance.delete({ where: { id } });
+        
+        revalidatePath('/attendance')
+        if(resp ) return resp;
+        return null;
+    }
+
+    /* REPORT MODELS */
+    export async function fetcClassroom(id: string) {
+        const staff = await db.staff.findUnique({ where:{ id }, include:{ nursery: true }});
+        const daily = await db.attendance.count({ 
+          where:{ 
+            child: { nurseryId: staff?.nurseryId },
+            checkIn: {
+               gte: moment(moment().format("YYYY-MM-DD")).toDate(),
+            }
+          }
+        });
+        // const week = await db.$queryRaw`select distinct(date_format("checkIn",'%a')) as period, count(*) as num FROM attendance where "checkIn" >= ${moment().startOf('isoWeek').toDate()} and "checkIn" <= ${moment().endOf('isoWeek').toDate()}  group by date_format("checkIn",'%a');`; // MYSQL
+        const week = await db.$queryRaw`select distinct(to_char("checkIn",'Dy')) as period, count(*) as num FROM attendance as a left join child as c on a."childId" = c.id where c."nurseryId" = ${staff?.nurseryId} and "checkIn" >= ${moment().startOf('isoWeek').toDate()} and "checkIn" <= ${moment().endOf('isoWeek').toDate()}  group by to_char("checkIn",'Dy');`; // POSTGRES
+        if(staff){
+          return { staff, daily,week }
+        } 
+        return null;
+    }
+
+    export async function fetcDashboard(id: string) {
+        try {
+            const child = await db.parentChild.findMany({ where: { parentId: id }, include:{ child: { include: {nursery: true }}}});
+            const staff = await db.staff.findUnique({ where:{ id }, include:{ nursery: true }});
+            const daily = await db.attendance.count({ 
+                where:{ 
+                    child: { nurseryId: staff?.nurseryId },
+                    checkIn: {
+                        gte: moment(moment().format("YYYY-MM-DD")).toDate(),
+                    }
+               }
+            });
+            // const week = await db.$queryRaw`select distinct(date_format("checkIn",'%a')) as period, count(*) as num FROM attendance where "checkIn" >= ${moment().startOf('isoWeek').toDate()} and "checkIn" <= ${moment().endOf('isoWeek').toDate()}  group by date_format("checkIn",'%a');`; // MYSQL
+            const week = await db.$queryRaw`select distinct(to_char("checkIn",'Dy')) as period, count(*) as num FROM attendance as a left join child as c on a."childId" = c.id where c."nurseryId" = ${staff?.nurseryId} and "checkIn" >= ${moment().startOf('isoWeek').toDate()} and "checkIn" <= ${moment().endOf('isoWeek').toDate()}  group by to_char("checkIn",'Dy');`; // POSTGRES
+        
+            if(staff || child ){
+            return { staff, daily,week, child }
+            } 
+            return { staff: null, daily: 0, week: [], child: [] };
+            
+        } catch (error) {
+           console.log(error)
+           return null;
+        }
+    }
+
+    /*
+        <DropdownMenuItem><Link href="/child/4/payments">View Attendances</Link></DropdownMenuItem>
+        <DropdownMenuItem><Link href="/child/4/attendance">View Attendance</Link></DropdownMenuItem>
+        <DropdownMenuItem><Link href="/child/4/activities">View Activities</Link></DropdownMenuItem>
+        <DropdownMenuItem><Link href="/child/4/medicals">View Medical Records</Link></DropdownMenuItem>
+        // Fetch staff list
+        // Fetch Payment list
+        // Fetch child list by nurseryId
+        // Fetch child list by parentId
+    */
+
+"use client"
+
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import moment from "moment";
+import { useEffect, useState } from "react";
+import { Bar, BarChart, XAxis, YAxis } from "recharts";
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "./ui/chart";
+
+
+// const chartConfig = {
+//   visitors: {
+//     label: "Attendance",
+//   },
+//   chrome: {
+//     label: "Mon",
+//     color: "hsl(var(--chart-1))",
+//   },
+//   safari: {
+//     label: "Tue",
+//     color: "hsl(var(--chart-2))",
+//   },
+//   firefox: {
+//     label: "Wed",
+//     color: "hsl(var(--chart-3))",
+//   },
+//   edge: {
+//     label: "Thu",
+//     color: "hsl(var(--chart-4))",
+//   },
+//   other: {
+//     label: "Fri",
+//     color: "hsl(var(--chart-5))",
+//   },
+// } satisfies ChartConfig
+
+export function AttendanceChart({ data }:any) {
+  const [ config, setConfig ] = useState<any & ChartConfig>({ visitors: { label: "Attendance" } }) ;
+  
+  const colors = [
+    { browser: "chrome",fill: "var(--color-chrome)", color: "hsl(var(--chart-1))" },
+    { browser: "safari",fill: "var(--color-safari)", color: "hsl(var(--chart-2))" },
+    { browser: "firefox",fill: "var(--color-firefox)", color: "hsl(var(--chart-3))" },
+    { browser: "edge",fill: "var(--color-edge)", color: "hsl(var(--chart-4))" },
+    { browser: "other", fill: "var(--color-other)", color: "hsl(var(--chart-5))" },
+  ]
+
+  // const chartData = [
+  //   { browser: "chrome", visitors: 275, fill: "var(--color-chrome)" },
+  //   { browser: "safari", visitors: 200, fill: "var(--color-safari)" },
+  //   { browser: "firefox", visitors: 187, fill: "var(--color-firefox)" },
+  //   { browser: "edge", visitors: 173, fill: "var(--color-edge)" },
+  //   { browser: "other", visitors: 90, fill: "var(--color-other)" },
+  // ]
+
+  let chartData = data?.map((r:any,i:number) => ({
+      browser: colors[i]?.browser,
+      visitors: parseInt(r.num),
+      fill: colors[i]?.fill
+  }))
+
+  const chartConfig = () =>  data?.map((r:any,i:number) => {
+    setConfig({
+      ...config,
+      [colors[i].browser]: {
+        label: r.period,
+        color: colors[i]?.color   
+      }
+    });
+  })
+
+  useEffect(() => {
+    chartConfig() 
+  },[])
+ console.log(config)
+  return (
+    <Card>
+      <CardHeader className="space-y-4">
+        <CardTitle className="px-6 py-0.5 w-fit rounded-full bg-secondary/40 text-primary/70 font-bold text-lg">WEEK ATTENDANCE</CardTitle>
+        <CardDescription className="indent-14 text-primary font-semibold text-xs">{ moment().startOf('isoWeek').format("ddd MMM DD, YYYY")} - {moment().startOf('isoWeek').format("ddd MMM DD, YYYY")}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ChartContainer config={config}>
+          <BarChart
+            accessibilityLayer
+            data={chartData}
+            layout="vertical"
+            margin={{
+              left: 0,
+            }}
+          >
+            <YAxis
+              dataKey="browser"
+              type="category"
+              tickLine={false}
+              tickMargin={10}
+              axisLine={false}
+              tickFormatter={(value) =>
+                config[value as keyof typeof chartConfig]?.label
+              }
+            />
+            <XAxis dataKey="visitors" type="number" hide />
+            <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
+            />
+            <Bar dataKey="visitors" layout="vertical" radius={5} />
+          </BarChart>
+        </ChartContainer>
+      </CardContent>
+      <CardFooter className="flex-col items-start gap-2 text-sm">
+        <div className="leading-none text-muted-foreground font-medium">
+          Showing total attendance for the week
+        </div>
+      </CardFooter>
+    </Card>
+  )
+}import Link from 'next/link';
+import { FaFemale, FaMale } from 'react-icons/fa';
+
+type Props = {
+   data:any;
+}
+
+function ChildMenuBox({ data }: Props) {
+
+  const child = data?.child;
+
+  return (
+    <div className="py-6 px-6 border-4 md:border-8 transition-all hover:border-primary/30 border-primary/10 rounded-2xl flex flex-col items-center space-y-10 bg-primarybg">
+        <div className="z-10 w-16 h-14 md:w-40 md:h-28 bg-primarybg border rounded-xl shadow-xl flex items-center justify-center">
+           { child && child?.gender == 'M' && <FaMale className="h-7 w-7 md:h-14 md:w-14 text-primary/70"/> }
+           { child && child?.gender == 'F' && <FaFemale className="h-7 w-7 md:h-14 md:w-14 text-primary/70"/> }
+        </div>
+        <div className="px-4 py-3 rounded-lg flex flex-col items-center justify-center text-center bg-white">
+            <span className="font-semibold text-sm md:text-base text-primary tracking-wide">{child?.firstName?.toUpperCase()} {child?.lastName?.toUpperCase()}</span>
+            <span className="font-semibold text-xs md:text-sm italic tracking-wider text-[#f69320]">{child?.nursery?.name}</span>
+        </div>
+        <div className="px-2 py-3 w-full rounded-xl grid grid-cols-1 md:grid-cols-2 gap-4 bg-white ">
+            <Link href={`/child/${child.id}/activities`} className="z-1 px-3 py-1 md:py-1 w-full shadow shadow-primary/30 rounded-full bg-secondary/40 text-primary/70 text-sm md:text-sm text-center font-bold tracking-wider">Activities</Link>
+            <Link href={`/child/${child.id}/payments`} className="z-1 px-3 py-1 md:py-1 w-full shadow shadow-primary/30 rounded-full bg-secondary/40 text-primary/70 text-sm md:text-sm text-center font-bold tracking-wider">Payments</Link>
+            <Link href={`/child/${child.id}/attendance`} className="z-1 px-3 py-1 md:py-1 w-full shadow shadow-primary/30 rounded-full bg-secondary/40 text-primary/70 text-sm md:text-sm text-center font-bold tracking-wider">Attendances</Link>
+            <Link href={`/child/${child.id}/medicals`} className="z-1 px-3 py-1 md:py-1 w-full shadow shadow-primary/30 rounded-full bg-secondary/40 text-primary/70 text-sm md:text-sm text-center font-bold tracking-wider">Medicals</Link>
+            {/* <Link href={`/child/${child.id}/observations`} className="z-1 px-3 py-1 md:py-1 w-full shadow shadow-primary/30 rounded-full bg-secondary/40 text-primary/70 text-sm md:text-sm text-center font-bold tracking-wider">Observations</Link> */}
+        </div>
+    </div>
+  )
+}
+
+export default ChildMenuBoximport Link from 'next/link';
+import { IconType } from 'react-icons';
+import SheetModal from './SheetModal';
+
+type Props = {
+    title: string;
+    Icon: IconType;
+    Intent: React.ReactNode & string;
+    modal: boolean;
+}
+
+function ClassMenuBox({ title, Icon, Intent, modal }: Props) {
+  return (
+    modal ? 
+    <SheetModal 
+        title={title} 
+        Trigger={
+          <button  className="flex items-center text-left">
+              <div className="z-10 w-16 h-14 md:w-20 md:h-16 bg-primarybg border rounded-full shadow-xl flex items-center justify-center">
+                { Icon && <Icon className="h-7 w-7 md:h-6 md:w-6 text-primary/70"/> }
+              </div>
+              <div className="z-1 -ml-4 pl-8 pr-4 py-1 md:py-4 h-8 md:h-14 w-full shadow shadow-primary/30 rounded-r-full bg-secondary/40 text-primary/70 text-sm md:text-[1.1rem] font-semibold tracking-wide">{title}</div>
+          </button>
+        }>
+        {/* @ts-ignore */}
+        <Intent />
+    </SheetModal>
+    : <Link href={Intent} className="flex items-center">
+          <div className="z-10 w-16 h-14 md:w-20 md:h-16 bg-primarybg border rounded-full shadow-xl flex items-center justify-center">
+            { Icon && <Icon className="h-7 w-7 md:h-6 md:w-6 text-primary/70"/> }
+          </div>
+          <div className="z-1 -ml-4 pl-6 pr-4 py-1 md:py-4 h-8 md:h-14 w-full shadow shadow-primary/30 rounded-r-full bg-secondary/40 text-primary/70 text-sm md:text-[1.1rem] font-semibold tracking-wide">{title}</div>
+      </Link>
+  )
+}
+
+export default ClassMenuBox
+"use client"
+
+import {
+  Label,
+  PolarGrid,
+  PolarRadiusAxis,
+  RadialBar,
+  RadialBarChart,
+} from "recharts"
+
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card"
+import { ChartConfig, ChartContainer } from "@/components/ui/chart"
+import moment from "moment"
+
+
+const chartConfig = {
+  members: {
+    label: "Visitors",
+  },
+  safari: {
+    label: "Safari",
+    color: "hsl(var(--chart-2))",
+  },
+} satisfies ChartConfig
+
+export function ClassSizeChart({ count }: any) {
+
+  const chartData = [
+    { browser: "safari", members: count, fill: "var(--color-safari)" },
+  ]
+
+  return (
+    <Card className="flex flex-col">
+      <CardHeader className="items-center pb-0">
+        <CardTitle className="px-6 py-0.5 w-fit rounded-full bg-secondary/40 text-primary/70 font-bold text-lg">DAILY ATTENDANCE</CardTitle>
+      </CardHeader>
+      <CardContent className="flex-1 pb-0">
+        <ChartContainer
+          config={chartConfig}
+          className="mx-auto aspect-square max-h-[250px]"
+        >
+          <RadialBarChart
+            data={chartData}
+            startAngle={0}
+            endAngle={250}
+            innerRadius={80}
+            outerRadius={110}
+          >
+            <PolarGrid
+              gridType="circle"
+              radialLines={false}
+              stroke="none"
+              className="first:fill-muted last:fill-background"
+              polarRadius={[86, 74]}
+            />
+            <RadialBar dataKey="members" background cornerRadius={10} />
+            <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
+              <Label
+                content={({ viewBox }) => {
+                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                    return (
+                      <text
+                        x={viewBox.cx}
+                        y={viewBox.cy}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                      >
+                        <tspan
+                          x={viewBox.cx}
+                          y={viewBox.cy}
+                          className="fill-foreground text-4xl font-bold"
+                        >
+                          {chartData[0]?.members?.toLocaleString()}
+                        </tspan>
+                        <tspan
+                          x={viewBox.cx}
+                          y={(viewBox.cy || 0) + 24}
+                          className="fill-muted-foreground"
+                        >
+                          Members
+                        </tspan>
+                      </text>
+                    )
+                  }
+                }}
+              />
+            </PolarRadiusAxis>
+          </RadialBarChart>
+        </ChartContainer>
+      </CardContent>
+      <CardFooter className="flex-col gap-2 text-sm">
+        {/* <div className="flex items-center gap-2 font-medium leading-none">
+          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+        </div> */}
+        <div className="leading-none text-muted-foreground">
+          Daily Attendance for { moment().format("dddd, MMMM DD, YYYY")}
+        </div>
+      </CardFooter>
+    </Card>
+  )
+}
+import React from 'react'
+import { MdOutlineAddCircle } from 'react-icons/md'
+
+type Props = {
+  title?: string
+}
+
+function Create({ title = 'ADD'}: Props) {
+  return (
+    <button className="pl-2 pr-3 py-0.5 w-fit flex items-center space-x-1 border-2 rounded-xl text-sm bg-primary border-primary/40 text-secondary font-medium font-inter ">
+        <MdOutlineAddCircle className="h-4 w-4 md:h-6 md:w-6" />
+        <span className="font-bold tracking-widest text-xs md:text-sm">{title}</span>
+    </button> 
+  )
+}
+
+export default Create
+}import Link from 'next/link';
+import React from 'react'
+import { IconType } from 'react-icons';
+
+type Props = {
+    title: string;
+    Icon: IconType;
+    link: string;
+}
+
+function DashMenuBox({ title, Icon, link }: Props) {
+  return (
+    <Link href={link} className="flex items-center ">
+        <div className="z-10 w-16 h-14 md:w-40 md:h-28 bg-primarybg border rounded-full shadow-xl flex items-center justify-center">
+           { Icon && <Icon className="h-7 w-7 md:h-14 md:w-14 text-primary/70"/> }
+        </div>
+        <div className="z-1 -ml-4 pl-8 pr-4 py-1 md:py-4 h-8 md:h-14 w-full shadow shadow-primary/30 rounded-r-full bg-secondary/40 text-primary/70 text-sm md:text-lg font-bold tracking-wider">{title}</div>
+    </Link>
+  )
+}
+
+export default DashMenuBox
+"use client"
+import { useRouter } from 'next/navigation';
+import React from 'react'
+import { IoChevronBackCircle } from 'react-icons/io5';
+import { MdHomeFilled } from 'react-icons/md'
+
+type Props = {
+    link?: string;
+}
+
+function GoBack({ link = '/dash' }: Props) {
+  const router = useRouter()
+  return (
+    <button onClick={() => router.back()} className="px-4 py-0.5 w-fit flex items-center space-x-2 border-2 rounded-xl text-sm bg-primary border-primary/40 text-secondary font-medium font-inter ">
+       <IoChevronBackCircle className="h-4 w-4 md:h-6 md:w-6" />
+    </button>
+  )
+}
+
+export default GoBack
+import Link from 'next/link'
+import React from 'react'
+import { MdHomeFilled } from 'react-icons/md'
+
+type Props = {
+    link?: string;
+}
+
+function GoHome({ link = '/dash' }: Props) {
+  return (
+    <Link href={link} className="px-4 py-0.5 w-fit flex items-center space-x-2 border-2 rounded-xl text-sm bg-primary border-primary/40 text-secondary font-medium font-inter ">
+       <MdHomeFilled className="h-4 w-4 md:h-6 md:w-6" />
+    </Link>
+  )
+}
+
+export default GoHome
+
+"use client"
+import { signOut, useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { MdOutlineChildCare, MdPersonPin } from "react-icons/md";
+
+type Props = {}
+
+function Header({}: Props) {
+  
+  const { data: session }:any = useSession();
+  const user:any = session?.user;
+
+  return (
+    <header className="z-10 w-full bg-white border-b-2 border-primarybg">
+        <div className="px-4 md:mx-auto md:max-w-7xl min-h-14 md:min-h-24 flex items-center justify-between space-x-5">
+            <div className="px-2 py-0.5 md:px-6 md:py-3 bg-secondary/30 shadow shadow-primary/40 rounded-full font-black font-kalam md:text-3xl tracking-widest flex items-center space-x-2">
+               <MdOutlineChildCare className="h-8 w-8 md:h-12 md:w-12 text-primary"/>
+               <h1>
+                 <span className="text-primary">ChildCare</span>
+                 <span className="text-[#F69320]">360<sup>&reg;</sup></span>
+               </h1>
+            </div>
+             
+            { session && session.user &&
+                <div className="px-4 py-0.5 md:max-w-96 shadow rounded-full bg-primarybg flex items-center space-x-2">
+                    <Link href="/dash" className="md:w-56 flex items-center">
+                        <div className="p-1 w-fit">
+                            <MdPersonPin className="h-6 w-6 md:h-10 md:w-10 text-primary"/>
+                        </div>
+                        <span className="hidden md:block w-52 text-primary font-inter font-medium truncate">{user?.name}</span>
+                    </Link>
+                    <button onClick={()=> signOut() } className="px-2 md:px-4 py-0.5 rounded md:border-b-4 border-primary/20 focus-visible:border-primary/40 bg-secondary text-xs md:text-lg text-primary md:font-bold">
+                        Logout
+                    </button>
+                    {/* <Link href="/" className="px-2 md:px-4 py-0.5 rounded md:border-b-4 border-primary/20 focus-visible:border-primary/40 bg-secondary text-xs md:text-lg text-primary md:font-bold">
+                        Logout
+                    </Link> */}
+                </div>
+            }
+        </div>
+    </header>
+  )
+}
+
+export default Header
+import React from 'react'
+
+type Props = {
+    label: string;
+    children?: React.ReactNode;
+}
+
+function PageTitle({ label,children }: Props) {
+  return (
+    <div className="px-4 md:px-0 flex flex-col md:flex-row md:items-start md:justify-between space-y-4 md:space-y-0 text-center">
+        <h1 className="px-3 md:px-6 py-1 w-full md:w-fit border-2 rounded-full text-xs md:text-lg bg-white border-primary/40 text-primary/40 font-semibold font-inter tracking-widest">{label}</h1>
+        <div className="flex items-center justify-center space-x-3">
+            {children}
+        </div>
+    </div>
+  )
+}
+
+export default PageTitle
+'use client'
+
+import { SessionProvider } from 'next-auth/react';
+import { AppProgressBar as ProgressBar } from 'next-nprogress-bar';
+import { ReactNode } from 'react';
+interface Props {
+  children: ReactNode
+}
+
+const Provider = ({ children }: Props) => {
+  return (
+   <SessionProvider>
+    {children}
+    <ProgressBar
+      height="6px"
+      color="#f69320"
+      options={{ showSpinner: false }}
+      shallowRouting
+    />
+  </SessionProvider>
+  )
+  
+}
+
+export default Provider
+import React from 'react';
+
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger
+} from "@/components/ui/sheet";
+ 
+type Props = {
+   title: string;
+   description?: string;
+   children: React.ReactNode;
+   Trigger?: React.ReactNode;
+}
+
+function SheetModal({ title, description, Trigger, children }: Props) {
+  return (
+    <Sheet>
+    <SheetTrigger asChild>{Trigger}</SheetTrigger>
+    <SheetContent className="font-sans">
+      <SheetHeader>
+        <SheetTitle className="px-6 py-3 rounded-full text-center text-xl text-primary/70 uppercase bg-secondary/20 tracking-widest">{title}</SheetTitle>
+        { description && <SheetDescription>{description}</SheetDescription> }
+      </SheetHeader>
+      { children}
+      {/* <SheetFooter>
+        <SheetClose asChild>
+          <Button type="submit">Save changes</Button>
+        </SheetClose>
+      </SheetFooter> */}
+    </SheetContent>
+  </Sheet>
+  )
+}
+
+export default SheetModal
